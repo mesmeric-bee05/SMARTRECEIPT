@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k \"pnpm dev:server\" \"pnpm dev:metro\"",
     "dev:server": "cross-env PORT=3000 NODE_ENV=development tsx watch server/_core/index.ts",
-    "dev:metro": "cross-env EXPO_USE_METRO_WORKSPACE_ROOT=1 EXPO_PORT=8081 npx expo start --web --port 8081",
+    "dev:metro": "cross-env EXPO_NO_METRO_WORKSPACE_ROOT=1 EXPO_USE_METRO_WORKSPACE_ROOT=0 EXPO_PORT=8081 npx expo start --web --port 8081",
     "build": "esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
@@ -33,23 +33,19 @@
     "drizzle-orm": "^0.44.7",
     "expo": "~57.0.24",
     "expo-asset": "~57.0.18",
-    "expo-audio": "~57.0.5",
     "expo-build-properties": "~57.0.21",
     "expo-constants": "~57.0.19",
     "expo-font": "~57.0.4",
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.20",
-    "expo-keep-awake": "~57.0.2",
     "expo-linking": "~57.0.10",
-    "expo-notifications": "~57.0.20",
     "expo-router": "~57.0.22",
     "expo-secure-store": "~57.0.4",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
     "expo-system-ui": "~57.0.4",
-    "expo-video": "~57.0.4",
     "expo-web-browser": "~57.0.3",
     "express": "^4.22.1",
     "jose": "6.1.0",
@@ -89,11 +85,5 @@
     "typescript": "~6.0.3",
     "vitest": "^2.1.9"
   },
-  "packageManager": "pnpm@9.12.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "unrs-resolver"
-    ]
-  }
+  "packageManager": "pnpm@9.12.0"
 }

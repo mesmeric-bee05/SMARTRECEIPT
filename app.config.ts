@@ -90,7 +90,7 @@ const config: ExpoConfig = {
     },
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
+    blockedPermissions: ["android.permission.RECORD_AUDIO"],
     intentFilters: [
       {
         action: "VIEW",
@@ -114,16 +114,10 @@ const config: ExpoConfig = {
     "expo-asset",
     "expo-router",
     [
-      "expo-audio",
+      "expo-image-picker",
       {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
-    ],
-    [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
+        photosPermission: "Allow $(PRODUCT_NAME) to select receipt images for local review.",
+        cameraPermission: "Allow $(PRODUCT_NAME) to capture receipt images for local review.",
       },
     ],
     [

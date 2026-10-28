@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { analyzePrice, calculateReceiptTotal, findDuplicateCandidates, normalizeDate, normalizeText } from "../lib/smartreceipt/engine";
+import { analyzePrice, calculateReceiptTotal, findDuplicateCandidates, normalizeDate, normalizeText, validateDraft } from "../lib/smartreceipt/engine";
 import { seedState } from "../lib/smartreceipt/types";
 
 describe("SmartReceipt domain engine", () => {
   it("normalizes receipt text and dates conservatively", () => {
     expect(normalizeText("  Fresh-Milk 500ml ")).toBe("fresh milk 500ml");
     expect(normalizeDate("24/10/2026")).toBe("2026-10-24");
+    expect(validateDraft({ merchant: "Shop", transactionDate: "2026-02-30", currency: "KES", statedTotalCents: 1000, subtotalCents: 1000, taxCents: 0, discountCents: 0, ocrConfidence: 90, items: [] })[0].status).toBe("failed");
+  });
+
+  it("fails total and subtotal checks instead of finalizing inconsistent arithmetic", () => {
+    const results = validateDraft({ merchant: "Shop", transactionDate: "2026-10-24", currency: "KES", statedTotalCents: 9999, subtotalCents: 2500, taxCents: 0, discountCents: 0, ocrConfidence: 90, items: [{ id: "1", productId: "p", rawDescription: "Rice", normalizedDescription: "rice", quantity: 2, unitPriceCents: 1000, lineTotalCents: 2000, confidence: 90 }] });
+    expect(results.find((result) => result.checkType === "subtotal")?.status).toBe("failed");
+    expect(results.find((result) => result.checkType === "total")?.status).toBe("failed");
   });
 
   it("calculates line totals with tax and discount", () => {

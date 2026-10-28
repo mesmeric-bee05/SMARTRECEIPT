@@ -13,8 +13,6 @@ export default function OAuthCallback() {
     code?: string;
     state?: string;
     error?: string;
-    sessionToken?: string;
-    user?: string;
   }>();
   const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -23,43 +21,6 @@ export default function OAuthCallback() {
     const handleCallback = async () => {
       console.log("[OAuth] Callback handler triggered");
       try {
-        // Check for sessionToken in params first (web OAuth callback from server redirect)
-        if (params.sessionToken) {
-          console.log("[OAuth] Session token found in params (web callback)");
-          await Auth.setSessionToken(params.sessionToken);
-
-          // Decode and store user info if available
-          if (params.user) {
-            try {
-              // Use atob for base64 decoding (works in both web and React Native)
-              const userJson =
-                typeof atob !== "undefined"
-                  ? atob(params.user)
-                  : Buffer.from(params.user, "base64").toString("utf-8");
-              const userData = JSON.parse(userJson);
-              const userInfo: Auth.User = {
-                id: userData.id,
-                openId: userData.openId,
-                name: userData.name,
-                email: userData.email,
-                loginMethod: userData.loginMethod,
-                lastSignedIn: new Date(userData.lastSignedIn || Date.now()),
-              };
-              await Auth.setUserInfo(userInfo);
-              console.log("[OAuth] User info stored");
-            } catch {
-              console.error("[OAuth] Failed to parse user data");
-            }
-          }
-
-          setStatus("success");
-          console.log("[OAuth] Web authentication successful, redirecting to home...");
-          setTimeout(() => {
-            router.replace("/(tabs)");
-          }, 1000);
-          return;
-        }
-
         // Get URL from params or Linking
         let url: string | null = null;
 
@@ -98,7 +59,6 @@ export default function OAuthCallback() {
         // Check for code and state
         let code: string | null = null;
         let state: string | null = null;
-        let sessionToken: string | null = null;
 
         // Try to get from params first
         if (params.code && params.state) {
@@ -112,37 +72,20 @@ export default function OAuthCallback() {
             const urlObj = new URL(url);
             code = urlObj.searchParams.get("code");
             state = urlObj.searchParams.get("state");
-            sessionToken = urlObj.searchParams.get("sessionToken");
             console.log("[OAuth] Parsed callback URL");
           } catch {
             console.log("[OAuth] Failed to parse as full URL, trying regex");
             // Try parsing as relative URL with query params
-            const match = url.match(/[?&](code|state|sessionToken)=([^&]+)/g);
+            const match = url.match(/[?&](code|state)=([^&]+)/g);
             if (match) {
               match.forEach((param) => {
                 const [key, value] = param.substring(1).split("=");
                 if (key === "code") code = decodeURIComponent(value);
                 if (key === "state") state = decodeURIComponent(value);
-                if (key === "sessionToken") sessionToken = decodeURIComponent(value);
               });
               console.log("[OAuth] Parsed callback query");
             }
           }
-        }
-
-        // If we have sessionToken directly from URL, use it
-        if (sessionToken) {
-          console.log("[OAuth] Session token found in URL, storing...");
-          await Auth.setSessionToken(sessionToken);
-          console.log("[OAuth] Session token stored successfully");
-          // User info is already in the OAuth callback response
-          // No need to fetch from API
-          setStatus("success");
-          console.log("[OAuth] Redirecting to home...");
-          setTimeout(() => {
-            router.replace("/(tabs)");
-          }, 1000);
-          return;
         }
 
         // Otherwise, exchange code for session token
@@ -204,7 +147,7 @@ export default function OAuthCallback() {
     };
 
     handleCallback();
-  }, [params.code, params.state, params.error, params.sessionToken, params.user, router]);
+  }, [params.code, params.state, params.error, router]);
 
   return (
     <SafeAreaView className="flex-1" edges={["top", "bottom", "left", "right"]}>

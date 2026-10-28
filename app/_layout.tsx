@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { Platform } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import {
@@ -18,12 +18,26 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
-import { SmartReceiptProvider } from "@/lib/smartreceipt/context";
+import { SmartReceiptProvider, useSmartReceipt } from "@/lib/smartreceipt/context";
+import { palette } from "@/lib/smartreceipt/theme";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 
 export const unstable_settings = { anchor: "(tabs)" };
+
+function HydratedStack() {
+  const { hydrated } = useSmartReceipt();
+  if (!hydrated) {
+    return <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: palette.ink }}><ActivityIndicator color={palette.amber} /><Text style={{ color: palette.textMuted, marginTop: 12 }}>Loading local ledger</Text></View>;
+  }
+  return <Stack screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="(tabs)" />
+    <Stack.Screen name="import" options={{ presentation: "modal" }} />
+    <Stack.Screen name="receipt/[id]" options={{ presentation: "modal" }} />
+    <Stack.Screen name="oauth/callback" />
+  </Stack>;
+}
 
 export default function RootLayout() {
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
@@ -55,14 +69,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <SmartReceiptProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="import" options={{ presentation: "modal" }} />
-              <Stack.Screen name="receipt/[id]" options={{ presentation: "modal" }} />
-              <Stack.Screen name="oauth/callback" />
-            </Stack>
-          </SmartReceiptProvider>
+          <SmartReceiptProvider><HydratedStack /></SmartReceiptProvider>
           <StatusBar style="light" />
         </QueryClientProvider>
       </trpc.Provider>

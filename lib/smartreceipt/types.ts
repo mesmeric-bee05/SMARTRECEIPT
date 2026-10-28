@@ -1,4 +1,4 @@
-export type ReceiptStatus = "draft" | "processing" | "review" | "verified" | "flagged";
+export type ReceiptStatus = "draft" | "processing" | "review" | "verified" | "flagged" | "archived";
 export type AnomalyStatus = "open" | "reviewed" | "valid" | "ignored" | "unresolved";
 export type DuplicateStatus = "open" | "dismissed" | "confirmed";
 
@@ -37,6 +37,7 @@ export interface Receipt {
   imageUri?: string;
   ocrConfidence: number;
   status: ReceiptStatus;
+  archivedAt?: string;
   items: ReceiptItem[];
   warnings: string[];
   audit: AuditEvent[];
@@ -89,7 +90,7 @@ export interface DuplicateCandidate {
 export interface ValidationResult {
   id: string;
   receiptId: string;
-  checkType: "total" | "required_fields";
+  checkType: "total" | "subtotal" | "required_fields";
   expectedCents?: number;
   actualCents?: number;
   differenceCents?: number;
@@ -279,6 +280,8 @@ export const seedState = (): SmartReceiptState => {
     ["prod_rice", 19600, "2026-10-03", "rcpt_104"],
     ["prod_rice", 19400, "2026-09-22", "seed"],
     ["prod_rice", 19600, "2026-09-12", "seed"],
+    ["prod_rice", 19300, "2026-09-05", "seed"],
+    ["prod_rice", 19700, "2026-08-28", "seed"],
     ["prod_oil", 8300, "2026-10-18", "rcpt_102"],
     ["prod_oil", 8200, "2026-10-03", "rcpt_104"],
     ["prod_oil", 8100, "2026-09-22", "seed"],
@@ -300,10 +303,10 @@ export const seedState = (): SmartReceiptState => {
       productId: "prod_rice",
       observedPriceCents: 21800,
       expectedPriceCents: 19500,
-      score: 3.2,
+      score: 7.4,
       threshold: 2.5,
-      sampleSize: 4,
-      method: "relative",
+      sampleSize: 5,
+      method: "mad",
       severity: "medium",
       explanation: "Pishori rice 2kg is 11.8% above its recent local baseline of KES 195.00.",
       status: "open",

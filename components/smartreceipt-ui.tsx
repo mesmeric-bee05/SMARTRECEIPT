@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 import { formatMoney } from "@/lib/smartreceipt/engine";
-import { palette, spacing, statusTone } from "@/lib/smartreceipt/theme";
+import { palette, redact, redactMoney, spacing, statusTone } from "@/lib/smartreceipt/theme";
 import type { Receipt } from "@/lib/smartreceipt/types";
 
 export const styles: any = StyleSheet.create({
@@ -108,12 +108,12 @@ export function MetricCard({ label, value, detail, tone = "neutral" }: { label: 
   return <View style={[styles.metricCard, { borderTopColor: color }]}><Text style={styles.metricLabel}>{label}</Text><Text style={[styles.metricValue, { color }]}>{value}</Text>{detail ? <Text style={styles.metricDetail}>{detail}</Text> : null}</View>;
 }
 
-export function ReceiptRow({ receipt, onPress }: { receipt: Receipt; onPress: () => void }) {
+export function ReceiptRow({ receipt, onPress, privacyMode = false }: { receipt: Receipt; onPress: () => void; privacyMode?: boolean }) {
   const tone = statusTone(receipt.status);
-  return <Pressable accessibilityRole="button" accessibilityLabel={`Open receipt from ${receipt.merchant}`} onPress={onPress} style={({ pressed }) => [styles.receiptRow, pressed && { backgroundColor: palette.surfaceRaised }]}>
+  return <Pressable accessibilityRole="button" accessibilityLabel={`Open receipt from ${redact(receipt.merchant, privacyMode)}`} onPress={onPress} style={({ pressed }) => [styles.receiptRow, pressed && { backgroundColor: palette.surfaceRaised }]}>
     <View style={[styles.receiptIcon, { backgroundColor: tone.bg }]}><Ionicons name={receipt.status === "flagged" ? "alert-circle-outline" : "receipt-outline"} size={20} color={tone.fg} /></View>
-    <View style={{ flex: 1, gap: 4 }}><Text style={styles.receiptMerchant} numberOfLines={1}>{receipt.merchant}</Text><Text style={styles.receiptMeta}>{receipt.transactionDate} · {receipt.items.length} items</Text></View>
-    <View style={{ alignItems: "flex-end", gap: 5 }}><Text style={styles.receiptAmount}>{formatMoney(receipt.statedTotalCents, receipt.currency)}</Text><StatusPill label={receipt.status === "flagged" ? "REVIEW" : receipt.status.toUpperCase()} status={receipt.status} /></View>
+    <View style={{ flex: 1, gap: 4 }}><Text style={styles.receiptMerchant} numberOfLines={1}>{redact(receipt.merchant, privacyMode)}</Text><Text style={styles.receiptMeta}>{receipt.transactionDate} · {receipt.items.length} items</Text></View>
+    <View style={{ alignItems: "flex-end", gap: 5 }}><Text style={styles.receiptAmount}>{redactMoney(formatMoney(receipt.statedTotalCents, receipt.currency), privacyMode)}</Text><StatusPill label={receipt.status === "flagged" ? "REVIEW" : receipt.status.toUpperCase()} status={receipt.status} /></View>
   </Pressable>;
 }
 

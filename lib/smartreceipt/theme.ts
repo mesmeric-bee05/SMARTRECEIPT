@@ -23,6 +23,10 @@ export const palette = {
 
 export const spacing = { xs: 6, sm: 10, md: 14, lg: 18, xl: 24, xxl: 32 };
 
+export const redact = (value: string, privacyMode: boolean) => privacyMode ? "••••••" : value;
+
+export const redactMoney = (value: string, privacyMode: boolean) => privacyMode ? "••••" : value;
+
 export const statusTone = (status: string) => {
   if (["verified", "reviewed", "valid", "passed"].includes(status)) return { bg: palette.emeraldSoft, fg: palette.emerald };
   if (["flagged", "open", "warning", "unresolved"].includes(status)) return { bg: palette.amberSoft, fg: palette.amber };

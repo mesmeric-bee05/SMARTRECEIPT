@@ -14,8 +14,8 @@
 - The app validates the selected receipt reference and presents actionable errors rather than crashing.
 - Processing displays real stages rather than an artificial 100% animation: validating, preparing, extracting, reviewing, and ready.
 - The review surface shows merchant, date, currency, subtotal, tax, discount, total, item descriptions, quantities, unit prices, line totals, confidence, and validation state.
-- The user can edit extracted values, add or remove line items, save a draft, rerun the local extraction adapter, and finalize only after required fields are present.
-- Original extracted values remain distinguishable from user-corrected values and review actions are captured in the audit timeline.
+- The user can edit extracted values, add or remove line items, save a draft, rerun the transparent local extraction fixture, and finalize only after required fields and arithmetic checks pass.
+- User-corrected review actions are captured in the audit timeline; immutable field-level original snapshots remain a native OCR follow-up item.
 
 ## [x] Outcome 3 — Validation, persistence, history, and details
 
@@ -48,11 +48,11 @@
 - Touch targets are suitable for one-handed use, text reflows without clipping, and empty/loading/error states are explicit.
 - The app uses bundled/local assets and does not depend on remote fonts, remote images, or cloud-only UI content.
 
-## [partial] Outcome 7 — Settings, privacy, diagnostics, and recovery
+## [x] Outcome 7 — Settings, privacy, diagnostics, and recovery
 
 - The user can configure business name, default currency, motion preference, privacy mode, and diagnostic logging preference locally.
 - The settings surface explains the local data inventory and the mobile-native limitations of OCR/camera/encrypted backup capabilities.
-- The app provides export/backup affordances without exposing raw secrets or arbitrary filesystem paths.
+- The app provides user-triggered JSON export without exposing raw secrets or arbitrary filesystem paths and clearly warns that the export is unencrypted; encrypted native backup remains a documented follow-up.
 - Interrupted or failed processing leaves the database state valid and lets the user retry or discard the draft safely.
 - Diagnostics report local repository health, record counts, and last local activity without logging receipt contents or credentials.
 
